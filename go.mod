@@ -3,7 +3,6 @@ module olimpo
 go 1.19
 
 require (
-	github.com/amitshekhariitbhu/go-backend-clean-architecture v0.0.0-20230424045125-d997f43fa2d2
 	github.com/gin-gonic/gin v1.9.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/spf13/viper v1.15.0
