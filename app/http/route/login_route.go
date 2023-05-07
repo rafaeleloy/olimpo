@@ -7,7 +7,6 @@ import (
 	"olimpo/infra/database"
 
 	"olimpo/app/domain"
-	"olimpo/app/http/controller"
 	"olimpo/app/repository"
 
 	"olimpo/app/usecase"
@@ -17,9 +16,7 @@ import (
 
 func NewLoginRouter(env *bootstrap.Env, timeout time.Duration, db database.Database, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db, domain.CollectionUser)
-	lc := &controller.LoginController{
-		LoginUsecase: usecase.NewLoginUsecase(ur, timeout),
-		Env:          env,
-	}
+
+	lc := usecase.NewLoginUsecase(env, ur, timeout)
 	group.POST("/login", lc.Login)
 }

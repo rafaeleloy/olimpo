@@ -1,12 +1,17 @@
 package domain
 
-import "context"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
-type Profile struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
+type Role uint32
 
-type ProfileUsecase interface {
-	GetProfileByID(c context.Context, userID string) (*Profile, error)
+const (
+	OrgAdmin Role = iota
+	OrgCollaborator
+)
+
+type ProfileRequest struct {
+	UserID primitive.ObjectID `json:"userID"`
+	Role   `json:"role"`
 }

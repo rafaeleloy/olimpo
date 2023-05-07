@@ -51,6 +51,18 @@ func (ur *userRepository) Fetch(c context.Context) ([]domain.User, error) {
 	return users, err
 }
 
+func (ur *userRepository) SetUserProfileRepository(c context.Context, userID primitive.ObjectID, profile domain.Role) error {
+	collection := ur.database.Collection(ur.collection)
+
+	_, err := collection.UpdateOne(
+		c,
+		bson.M{"_id": userID},
+		bson.M{"$set": bson.M{"profile_role": profile}},
+	)
+
+	return err
+}
+
 func (ur *userRepository) GetByEmail(c context.Context, email string) (domain.User, error) {
 	collection := ur.database.Collection(ur.collection)
 	var user domain.User

@@ -2,38 +2,71 @@ package usecase
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"olimpo/app/domain"
+	"olimpo/app/http/response"
+	"olimpo/bootstrap"
 	"olimpo/internal/tokenutil"
+
+	"github.com/gin-gonic/gin"
 )
 
-type refreshTokenUsecase struct {
+type RefreshTokenUsecase struct {
 	userRepository domain.UserRepository
 	contextTimeout time.Duration
+	env            *bootstrap.Env
 }
 
-func NewRefreshTokenUsecase(userRepository domain.UserRepository, timeout time.Duration) domain.RefreshTokenUsecase {
-	return &refreshTokenUsecase{
+func NewRefreshTokenUsecase(env *bootstrap.Env, userRepository domain.UserRepository, timeout time.Duration) *RefreshTokenUsecase {
+	return &RefreshTokenUsecase{
 		userRepository: userRepository,
 		contextTimeout: timeout,
+		env:            env,
 	}
 }
 
-func (rtu *refreshTokenUsecase) GetUserByID(c context.Context, email string) (domain.User, error) {
+func (rtu *RefreshTokenUsecase) RefreshToken(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, rtu.contextTimeout)
 	defer cancel()
-	return rtu.userRepository.GetByID(ctx, email)
-}
 
-func (rtu *refreshTokenUsecase) CreateAccessToken(user *domain.User, secret string, expiry int) (accessToken string, err error) {
-	return tokenutil.CreateAccessToken(user, secret, expiry)
-}
+	var request domain.RefreshTokenRequest
 
-func (rtu *refreshTokenUsecase) CreateRefreshToken(user *domain.User, secret string, expiry int) (refreshToken string, err error) {
-	return tokenutil.CreateRefreshToken(user, secret, expiry)
-}
+	err := c.ShouldBind(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+		return
+	}
 
-func (rtu *refreshTokenUsecase) ExtractIDFromToken(requestToken string, secret string) (string, error) {
-	return tokenutil.ExtractIDFromToken(requestToken, secret)
+	userInformation, err := tokenutil.ExtractUserInformationFromToken(request.RefreshToken, rtu.env.RefreshTokenSecret)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Message: "User not found"})
+		return
+	}
+
+	user, err := rtu.userRepository.GetByID(ctx, userInformation.ID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Message: "User not found"})
+		return
+	}
+
+	accessToken, err := tokenutil.CreateAccessToken(&user, rtu.env.AccessTokenSecret, rtu.env.AccessTokenExpiryHour)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	refreshToken, err := tokenutil.CreateRefreshToken(&user, rtu.env.RefreshTokenSecret, rtu.env.RefreshTokenExpiryHour)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	refreshTokenResponse := domain.RefreshTokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+
+	c.JSON(http.StatusOK, refreshTokenResponse)
 }

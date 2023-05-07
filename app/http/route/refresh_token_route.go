@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"olimpo/app/domain"
-	"olimpo/app/http/controller"
 	"olimpo/app/repository"
 	"olimpo/app/usecase"
 	"olimpo/bootstrap"
@@ -15,9 +14,7 @@ import (
 
 func NewRefreshTokenRouter(env *bootstrap.Env, timeout time.Duration, db database.Database, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db, domain.CollectionUser)
-	rtc := &controller.RefreshTokenController{
-		RefreshTokenUsecase: usecase.NewRefreshTokenUsecase(ur, timeout),
-		Env:                 env,
-	}
+
+	rtc := usecase.NewRefreshTokenUsecase(env, ur, timeout)
 	group.POST("/refresh", rtc.RefreshToken)
 }

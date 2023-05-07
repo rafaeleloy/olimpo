@@ -10,8 +10,9 @@ import (
 )
 
 type JwtCustomClaims struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
+	Name        string      `json:"name"`
+	ID          string      `json:"id"`
+	ProfileRole domain.Role `json:"profile_role"`
 	jwt.StandardClaims
 }
 
@@ -23,8 +24,9 @@ type JwtCustomRefreshClaims struct {
 func CreateAccessToken(user *domain.User, secret string, expiry int) (accessToken string, err error) {
 	exp := time.Now().Add(time.Hour * time.Duration(expiry)).Unix()
 	claims := &JwtCustomClaims{
-		Name: user.Name,
-		ID:   user.ID.Hex(),
+		Name:        user.Name,
+		ID:          user.ID.Hex(),
+		ProfileRole: user.ProfileRole,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: exp,
 		},
@@ -65,7 +67,13 @@ func IsAuthorized(requestToken string, secret string) (bool, error) {
 	return true, nil
 }
 
-func ExtractIDFromToken(requestToken string, secret string) (string, error) {
+type UserInformation struct {
+	Name        string
+	ID          string
+	ProfileRole domain.Role
+}
+
+func ExtractUserInformationFromToken(requestToken string, secret string) (*UserInformation, error) {
 	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -74,14 +82,18 @@ func ExtractIDFromToken(requestToken string, secret string) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
+		return &UserInformation{}, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if !ok && !token.Valid {
-		return "", fmt.Errorf("Invalid Token")
+		return &UserInformation{}, fmt.Errorf("Invalid Token")
 	}
 
-	return claims["id"].(string), nil
+	return &UserInformation{
+		Name:        claims["name"].(string),
+		ID:          claims["id"].(string),
+		ProfileRole: domain.Role(claims["profile_role"].(float64)),
+	}, nil
 }

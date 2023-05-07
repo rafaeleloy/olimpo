@@ -19,9 +19,10 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db database.Database, gin 
 	NewLoginRouter(env, timeout, db, publicRouter)
 	NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
-	protectedRouter := gin.Group("")
-	// Middleware to verify AccessToken
-	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
-	// All Private APIs
-	NewProfileRouter(env, timeout, db, protectedRouter)
+	protectedRouterOrgAdmin := gin.Group("")
+	protectedRouterOrgAdmin.Use(
+		middleware.JwtAuthMiddleware(env.AccessTokenSecret),
+		middleware.IsOrgAdminMiddleware(),
+	)
+	NewProfileRouter(env, timeout, db, protectedRouterOrgAdmin)
 }

@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	app := application.App()
 
 	env := app.Env

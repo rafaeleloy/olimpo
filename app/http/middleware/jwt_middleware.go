@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"olimpo/app/domain"
 	"olimpo/app/http/response"
 
 	"olimpo/internal/tokenutil"
@@ -19,13 +20,13 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 			authToken := t[1]
 			authorized, err := tokenutil.IsAuthorized(authToken, secret)
 			if authorized {
-				userID, err := tokenutil.ExtractIDFromToken(authToken, secret)
+				userInformation, err := tokenutil.ExtractUserInformationFromToken(authToken, secret)
 				if err != nil {
 					c.JSON(http.StatusUnauthorized, response.ErrorResponse{Message: err.Error()})
 					c.Abort()
 					return
 				}
-				c.Set("x-user-id", userID)
+				c.Set("x-user-info", userInformation)
 				c.Next()
 				return
 			}
@@ -35,5 +36,24 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 		}
 		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Message: "Not authorized"})
 		c.Abort()
+	}
+}
+
+func IsOrgAdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		value, exists := c.Get("x-user-info")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, response.ErrorResponse{Message: "Not authorized"})
+			c.Abort()
+		}
+
+		userInformation := value.(*tokenutil.UserInformation)
+		if userInformation.ProfileRole != domain.OrgAdmin {
+			c.JSON(http.StatusUnauthorized, response.ErrorResponse{Message: "Not authorized"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
 	}
 }
