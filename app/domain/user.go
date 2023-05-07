@@ -16,7 +16,7 @@ type User struct {
 	Email       string               `bson:"email"`
 	Password    string               `bson:"password"`
 	OrgID       primitive.ObjectID   `bson:"org_id"`
-	Campaigns   []primitive.ObjectID `bson:"campaigns"`
+	CampaignsID []primitive.ObjectID `bson:"campaigns_id"`
 	ProfileRole Role                 `bson:"profile_role"`
 }
 
