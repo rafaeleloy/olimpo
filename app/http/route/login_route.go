@@ -9,7 +9,7 @@ import (
 	"olimpo/app/domain"
 	"olimpo/app/repository"
 
-	"olimpo/app/usecase"
+	usecase "olimpo/app/usecase/user_usecase"
 
 	"github.com/gin-gonic/gin"
 )

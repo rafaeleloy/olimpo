@@ -24,6 +24,6 @@ type UserRepository interface {
 	Create(c context.Context, user *User) error
 	Fetch(c context.Context) ([]User, error)
 	GetByEmail(c context.Context, email string) (User, error)
-	SetUserProfileRepository(c context.Context, userID primitive.ObjectID, profile Role) error
+	SetUserProfile(c context.Context, userID primitive.ObjectID, profile Role) error
 	GetByID(c context.Context, id string) (User, error)
 }

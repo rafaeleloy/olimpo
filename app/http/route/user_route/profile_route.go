@@ -1,9 +1,9 @@
-package route
+package user_route
 
 import (
 	"olimpo/app/domain"
 	"olimpo/app/repository"
-	"olimpo/app/usecase"
+	usecase "olimpo/app/usecase/user_usecase"
 	"olimpo/bootstrap"
 	"olimpo/infra/database"
 	"time"
@@ -15,5 +15,5 @@ func NewProfileRouter(env *bootstrap.Env, timeout time.Duration, db database.Dat
 	ur := repository.NewUserRepository(db, domain.CollectionUser)
 
 	pu := usecase.NewProfileUsecase(env, ur, timeout)
-	group.POST("/set-user-profile", pu.SetUserProfile)
+	group.POST("/user/set-profile", pu.SetUserProfile)
 }

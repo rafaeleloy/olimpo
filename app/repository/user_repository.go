@@ -51,7 +51,7 @@ func (ur *userRepository) Fetch(c context.Context) ([]domain.User, error) {
 	return users, err
 }
 
-func (ur *userRepository) SetUserProfileRepository(c context.Context, userID primitive.ObjectID, profile domain.Role) error {
+func (ur *userRepository) SetUserProfile(c context.Context, userID primitive.ObjectID, profile domain.Role) error {
 	collection := ur.database.Collection(ur.collection)
 
 	_, err := collection.UpdateOne(

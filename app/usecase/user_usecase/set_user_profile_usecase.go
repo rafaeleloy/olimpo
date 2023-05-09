@@ -1,4 +1,4 @@
-package usecase
+package user_usecase
 
 import (
 	"context"
@@ -37,7 +37,7 @@ func (pu *ProfileUsecase) SetUserProfile(c *gin.Context) {
 		return
 	}
 
-	err = pu.userRepository.SetUserProfileRepository(ctx, request.UserID, request.Role)
+	err = pu.userRepository.SetUserProfile(ctx, request.UserID, request.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return

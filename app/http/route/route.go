@@ -6,6 +6,8 @@ import (
 	"olimpo/bootstrap"
 
 	"olimpo/app/http/middleware"
+	"olimpo/app/http/route/org_route"
+	"olimpo/app/http/route/user_route"
 
 	"olimpo/infra/database"
 
@@ -17,7 +19,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db database.Database, gin 
 	// All Public APIs
 	NewSignupRouter(env, timeout, db, publicRouter)
 	NewLoginRouter(env, timeout, db, publicRouter)
-	NewRefreshTokenRouter(env, timeout, db, publicRouter)
+	user_route.NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
 	// TODO: Add functions to get, update and delete orgs,
 	// do the same for users and campaigns
@@ -26,6 +28,6 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db database.Database, gin 
 		middleware.JwtAuthMiddleware(env.AccessTokenSecret),
 		middleware.IsOrgAdminMiddleware(),
 	)
-	NewProfileRouter(env, timeout, db, protectedRouterOrgAdmin)
-	NewCreateOrgRouter(env, timeout, db, protectedRouterOrgAdmin)
+	user_route.NewProfileRouter(env, timeout, db, protectedRouterOrgAdmin)
+	org_route.NewCreateOrgRouter(env, timeout, db, protectedRouterOrgAdmin)
 }
