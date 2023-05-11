@@ -16,7 +16,8 @@ import (
 
 func NewUpdateOrgNameRouter(env *bootstrap.Env, timeout time.Duration, db database.Database, group *gin.RouterGroup) {
 	or := repository.NewOrgRepository(db, domain.CollectionOrg)
+	ur := repository.NewUserRepository(db, domain.CollectionOrg)
 
-	ou := usecase.NewUpdateOrgNameUseCase(env, or, timeout)
+	ou := usecase.NewUpdateMyOrgUseCase(env, or, ur, timeout)
 	group.PUT("/org", ou.UpdateOrgName)
 }

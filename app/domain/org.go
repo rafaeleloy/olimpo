@@ -23,16 +23,17 @@ type CreateOrgRequest struct {
 	CampaignsID []primitive.ObjectID `form:"campaigns_id"`
 }
 
-type UpdateOrgNameRequest struct {
-	Name  string             `form:"name" binding:"required"`
-	OrgID primitive.ObjectID `form:"org_id" binding:"required"`
+type UpdateOrgRequest struct {
+	Name        string               `form:"name" binding:"required"`
+	UsersID     []primitive.ObjectID `form:"users_id"`
+	CampaignsID []primitive.ObjectID `form:"campaigns_id"`
 }
 
 type GetAllOrgsResponse struct {
 	Orgs []Org `json:"orgs"`
 }
 
-type GetOrgByIDResponse struct {
+type GetOrgResponse struct {
 	Org `json:"orgs"`
 }
 
@@ -41,5 +42,5 @@ type OrgRepository interface {
 	Fetch(c context.Context) ([]Org, error)
 	GetByID(c context.Context, id string) (Org, error)
 	GetByName(c context.Context, name string) (Org, error)
-	UpdateOrgName(c context.Context, orgID primitive.ObjectID, name string) error
+	Update(c context.Context, orgID string, newOrg UpdateOrgRequest) error
 }

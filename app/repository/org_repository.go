@@ -49,13 +49,13 @@ func (or *orgRepository) Fetch(c context.Context) ([]domain.Org, error) {
 	return orgs, err
 }
 
-func (ur *orgRepository) UpdateOrgName(c context.Context, orgID primitive.ObjectID, name string) error {
+func (ur *orgRepository) Update(c context.Context, orgID string, newOrg domain.UpdateOrgRequest) error {
 	collection := ur.database.Collection(ur.collection)
 
 	_, err := collection.UpdateOne(
 		c,
 		bson.M{"_id": orgID},
-		bson.M{"$set": bson.M{"name": name}},
+		bson.M{"$set": bson.M{"name": newOrg.Name, "campaigns_id": newOrg.CampaignsID, "users_id": newOrg.UsersID}},
 	)
 
 	return err

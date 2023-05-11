@@ -14,9 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewGetAllOrgsRouter(env *bootstrap.Env, timeout time.Duration, db database.Database, group *gin.RouterGroup) {
+func NewGetMyOrgRouter(env *bootstrap.Env, timeout time.Duration, db database.Database, group *gin.RouterGroup) {
 	or := repository.NewOrgRepository(db, domain.CollectionOrg)
+	ur := repository.NewUserRepository(db, domain.CollectionOrg)
 
-	ou := usecase.NewGetAllOrgsUseCase(env, or, timeout)
-	group.GET("/org", ou.GetAllOrgs)
+	ou := usecase.NewGetMyOrgUseCase(env, or, ur, timeout)
+	group.GET("/org", ou.GetMyOrg)
 }
